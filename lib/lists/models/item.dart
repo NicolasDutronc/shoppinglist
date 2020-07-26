@@ -14,16 +14,16 @@ class Item extends Equatable {
 
   static Item fromJson(Map<String, dynamic> json) {
     return Item(
-        name: json["name"] as String,
-        quantity: json["quantity"] as String,
-        done: json["done"] as bool);
+        name: json['name'] as String,
+        quantity: json['quantity'] as String,
+        done: json['done'] as bool);
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "name": name,
-      "quantity": quantity,
-      "done": done,
+      'name': name,
+      'quantity': quantity,
+      'done': done,
     };
   }
 

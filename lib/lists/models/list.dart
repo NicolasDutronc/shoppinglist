@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:shoplist/lists/models/item.dart';
@@ -19,19 +17,19 @@ class ShoppingList extends Equatable {
       : this(name: list.name, id: list.id, items: List.from(list.items));
 
   static ShoppingList fromJson(Map<String, dynamic> json) {
-    var rawItems = jsonDecode(json["items"]) as List;
+    var rawItems = json['items'] as List;
     return ShoppingList(
-      id: json["id"] as String,
-      name: json["names"] as String,
+      id: json['id'] as String,
+      name: json['name'] as String,
       items: rawItems.map((itemJson) => Item.fromJson(itemJson)).toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
-      "name": name,
-      "items": items.map((item) => item.toJson()).toList(),
+      'id': id,
+      'name': name,
+      'items': items.map((item) => item.toJson()).toList(),
     };
   }
 
@@ -40,6 +38,6 @@ class ShoppingList extends Equatable {
 
   @override
   String toString() {
-    return "List { id: $id, name: $name, items: ${items.map((item) => item.toString()).toList()} }";
+    return 'List { id: $id, name: $name, items: ${items.map((item) => item.toString()).toList()} }';
   }
 }
