@@ -22,6 +22,10 @@ abstract class UserRepository {
   }
 
   Future<String> getToken() async {
-    return storage.read(key: "token");
+    String token = await storage.read(key: "token");
+    if (token == null) {
+      throw new Exception('token not found');
+    }
+    return token;
   }
 }
