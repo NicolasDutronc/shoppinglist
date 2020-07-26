@@ -20,7 +20,9 @@ class ListsBloc extends Bloc<ListsEvent, ListsState> {
       yield ListsLoadInProgress();
       try {
         final lists = await listRepository.findAll();
-        yield ListsLoadSuccessState(lists: lists);
+        if (lists != null) {
+          yield ListsLoadSuccessState(lists: lists);
+        }
       } catch (e) {
         yield ListsLoadFailure(error: e.toString());
       }
