@@ -145,7 +145,7 @@ class ShoppingListBloc extends Bloc<ListEvent, ListState> {
             yield ListLoadSuccessState(list: updatedList);
           }
         } catch (e) {
-          yield ListLoadFailure(error: e);
+          yield ListLoadFailure(error: e.toString());
         }
       }
     }
