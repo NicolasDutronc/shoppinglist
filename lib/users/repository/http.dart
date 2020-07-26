@@ -3,34 +3,49 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:shoplist/users/repository/repository.dart';
-import 'package:http/http.dart' as http;
 
 class HttpUserRepository extends UserRepository {
   final String url;
+  HttpClient _client;
 
-  HttpUserRepository({@required this.url});
+  HttpUserRepository({@required this.url}) {
+    _client = HttpClient()
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
 
   @override
   Future<String> authenticate(
       {@required String username, @required String password}) async {
-    String route = url + "/api/v1/login";
-    final response = await http.post(
-      route,
-      headers: {
-        HttpHeaders.contentTypeHeader: "application/json",
-      },
-      body: jsonEncode(<String, String>{
-        "username": username,
-        "password": password,
-      }),
-    );
+    // build request
+    HttpClientRequest req =
+        await _client.postUrl(Uri.https(url, '/api/v1/login'));
+    req.headers.contentType = ContentType.json;
+    req.add(utf8.encode(jsonEncode({
+      'username': username,
+      'password': password,
+    })));
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body)["token"];
-    } else if (response.statusCode == 401) {
-      throw Exception("Wrong username/password combination");
-    } else {
-      throw Exception("Failed to authenticate");
+    // process response
+    HttpClientResponse resp = await req.close();
+    switch (resp.statusCode) {
+      case 200:
+        var body = await resp
+            .transform(utf8.decoder)
+            .join()
+            .then((value) => jsonDecode(value));
+
+        String token = body['token'];
+        if (token == null || token.length == 0) {
+          throw Exception("Invalid token : $token");
+        }
+
+        return token;
+        break;
+      case 401:
+        throw Exception("Wrong username/password combination");
+      default:
+        throw Exception("Failed to authenticate");
     }
   }
 }
