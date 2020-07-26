@@ -26,46 +26,54 @@ class _LoginFormState extends State<LoginForm> {
       },
       builder: (context, state) {
         return Form(
-          child: Column(
-            children: [
-              TextFormField(
-                autofocus: true,
-                decoration: InputDecoration(labelText: "username"),
-                controller: _usernameController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Entrer votre nom d'utilisateur";
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                obscureText: true,
-                decoration: InputDecoration(labelText: "password"),
-                controller: _passwordController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Entrer votre mot de passe";
-                  }
-                  return null;
-                },
-              ),
-              RaisedButton(
-                onPressed: () {
-                  if (state is! LoginLoading) {
-                    BlocProvider.of<LoginBloc>(context).add(LoginButtonPressed(
-                      username: _usernameController.text,
-                      password: _passwordController.text,
-                    ));
-                  }
-                },
-                child: Text("Login"),
-              ),
-              Container(
-                child:
-                    state is LoginLoading ? CircularProgressIndicator() : null,
-              )
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                TextFormField(
+                  autofocus: true,
+                  decoration: InputDecoration(labelText: "username"),
+                  controller: _usernameController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Entrer votre nom d'utilisateur";
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: "password"),
+                  controller: _passwordController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Entrer votre mot de passe";
+                    }
+                    return null;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 50, bottom: 50),
+                  child: RaisedButton(
+                    onPressed: () {
+                      if (state is! LoginLoading) {
+                        BlocProvider.of<LoginBloc>(context)
+                            .add(LoginButtonPressed(
+                          username: _usernameController.text,
+                          password: _passwordController.text,
+                        ));
+                      }
+                    },
+                    child: Text("Login"),
+                  ),
+                ),
+                Container(
+                  child: state is LoginLoading
+                      ? CircularProgressIndicator()
+                      : null,
+                )
+              ],
+            ),
           ),
         );
       },
