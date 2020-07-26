@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shoplist/components/appbar.dart';
 import 'package:shoplist/lists/list/bloc.dart';
 import 'package:shoplist/lists/list/events.dart';
 import 'package:shoplist/lists/lists/bloc.dart';
@@ -10,16 +11,10 @@ import 'package:shoplist/screens/addList.dart';
 import 'package:shoplist/screens/list.dart';
 
 class Home extends StatelessWidget {
-  final String title;
-
-  Home(this.title);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: getAppBar(context),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
@@ -32,13 +27,18 @@ class Home extends StatelessWidget {
         builder: (context, state) {
           // loading
           if (state is ListsLoadInProgress) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           // error fetching lists
           if (state is ListsLoadFailure) {
             return Center(
-              child: Text(state.error),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(state.error),
+              ),
             );
           }
 
