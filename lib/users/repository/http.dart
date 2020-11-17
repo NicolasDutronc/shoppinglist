@@ -19,7 +19,7 @@ class HttpUserRepository extends UserRepository {
       {@required String username, @required String password}) async {
     // build request
     HttpClientRequest req =
-        await _client.postUrl(Uri.https(url, '/api/v1/login'));
+        await _client.postUrl(Uri.http(url, '/api/v1/login'));
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
       'username': username,
