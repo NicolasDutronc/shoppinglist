@@ -35,6 +35,12 @@ class MemoryListsRepository extends ListsRepository {
   }
 
   @override
+  Future<ShoppingList> findById(String id) {
+    return Future<ShoppingList>.delayed(
+        Duration(milliseconds: 500), () => lists[id]);
+  }
+
+  @override
   Future<ShoppingList> store(String name) {
     String id = lists.length.toString();
     ShoppingList newList =

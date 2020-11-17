@@ -11,15 +11,15 @@ abstract class ListEvent extends Equatable {
 }
 
 class ListLoadSuccess extends ListEvent {
-  final ShoppingList list;
+  final String listId;
 
-  const ListLoadSuccess({@required this.list});
-
-  @override
-  List<Object> get props => [list];
+  const ListLoadSuccess({@required this.listId});
 
   @override
-  String toString() => "ListLoadSuccess { list: $list }";
+  List<Object> get props => [listId];
+
+  @override
+  String toString() => "ListLoadSuccess { listId: $listId }";
 }
 
 class ItemAddedEvent extends ListEvent {

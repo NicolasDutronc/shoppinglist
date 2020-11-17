@@ -21,7 +21,13 @@ class ShoppingListBloc extends Bloc<ListEvent, ListState> {
   Stream<ListState> mapEventToState(ListEvent event) async* {
     // load success
     if (event is ListLoadSuccess) {
-      yield ListLoadSuccessState(list: event.list);
+      yield ListLoadInProgress();
+      try {
+        final list = await listsBloc.listRepository.findById(event.listId);
+        yield ListLoadSuccessState(list: list);
+      } catch (e) {
+        yield ListLoadFailure(error: e);
+      }
     }
 
     // item added

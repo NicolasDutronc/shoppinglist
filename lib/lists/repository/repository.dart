@@ -3,6 +3,7 @@ import 'package:shoplist/lists/models/list.dart';
 
 abstract class ListsRepository {
   Future<List<ShoppingList>> findAll();
+  Future<ShoppingList> findById(String id);
   Future<ShoppingList> store(String name);
   Future<Item> addItem(ShoppingList list, Item item);
   Future<int> updateItem(

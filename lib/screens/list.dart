@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,10 +12,29 @@ import 'package:shoplist/screens/editItem.dart';
 
 import 'addItem.dart';
 
-class ListScreen extends StatelessWidget {
+class ListScreen extends StatefulWidget {
+  @override
+  _ListScreenState createState() => _ListScreenState();
+}
+
+class _ListScreenState extends State<ListScreen> {
+  Completer<void> _refreshCompleter;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshCompleter = Completer<void>();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ShoppingListBloc, ListState>(
+    return BlocConsumer<ShoppingListBloc, ListState>(
+      listener: (context, state) {
+        if (state is ListLoadSuccess) {
+          _refreshCompleter?.complete();
+          _refreshCompleter = Completer<void>();
+        }
+      },
       builder: (context, state) {
         if (state is ListLoadInProgress) {
           return Scaffold(
@@ -25,21 +46,28 @@ class ListScreen extends StatelessWidget {
         }
 
         if (state is ListLoadSuccessState) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(state.list.name),
+          return RefreshIndicator(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(state.list.name),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return AddItemForm();
+                  }));
+                },
+                child: Icon(Icons.add),
+              ),
+              body: _buildShoplist(context, state.list),
+              backgroundColor: Colors.grey[200],
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return AddItemForm();
-                }));
-              },
-              child: Icon(Icons.add),
-            ),
-            body: _buildShoplist(context, state.list),
-            backgroundColor: Colors.grey[200],
+            onRefresh: () {
+              BlocProvider.of<ShoppingListBloc>(context)
+                  .add(ListLoadSuccess(listId: state.list.id));
+              return _refreshCompleter.future;
+            },
           );
         }
 

@@ -36,7 +36,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.getUrl(Uri.https(url, '/api/v1/lists'));
+        await _client.getUrl(Uri.http(url, '/api/v1/lists'));
 
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
@@ -63,6 +63,40 @@ class HttpListRepository extends ListsRepository {
   }
 
   @override
+  Future<ShoppingList> findById(String id) async {
+    String token;
+    try {
+      token = await userRepository.getToken();
+    } catch (e) {
+      authenticationBloc.add(LoggedOut());
+      return null;
+    }
+
+    HttpClientRequest req =
+        await _client.getUrl(Uri.http(url, '/api/v1/lists/$id'));
+
+    req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+
+    HttpClientResponse response = await req.close();
+
+    switch (response.statusCode) {
+      case 200:
+        var rawBody = await response
+            .transform(utf8.decoder)
+            .join()
+            .then((value) => jsonDecode(value));
+        var createdList = ShoppingList.fromJson(rawBody["list"]);
+        return createdList;
+      case 401:
+        authenticationBloc.add(LoggedOut());
+        return null;
+      default:
+        throw Exception(
+            "Unexpected status code : " + response.statusCode.toString());
+    }
+  }
+
+  @override
   Future<ShoppingList> store(String name) async {
     String token;
     try {
@@ -73,7 +107,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.postUrl(Uri.https(url, '/api/v1/lists'));
+        await _client.postUrl(Uri.http(url, '/api/v1/lists'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -110,7 +144,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.postUrl(Uri.https(url, '/api/v1/lists/${list.id}'));
+        await _client.postUrl(Uri.http(url, '/api/v1/lists/${list.id}'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -149,7 +183,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}'));
+        await _client.putUrl(Uri.http(url, '/api/v1/lists/${list.id}'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -189,7 +223,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}/delete'));
+        await _client.putUrl(Uri.http(url, '/api/v1/lists/${list.id}/delete'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -227,7 +261,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}/toggle'));
+        await _client.putUrl(Uri.http(url, '/api/v1/lists/${list.id}/toggle'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -266,7 +300,7 @@ class HttpListRepository extends ListsRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}/clear'));
+        await _client.putUrl(Uri.http(url, '/api/v1/lists/${list.id}/clear'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
     HttpClientResponse response = await req.close();
