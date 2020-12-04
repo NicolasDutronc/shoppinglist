@@ -17,7 +17,8 @@ import 'package:shoplist/users/repository/repository.dart';
 
 void main() {
   print('kReleaseMode: $kReleaseMode');
-  String backendUrl = '10.0.2.2:8080';
+  // String backendUrl = '10.0.2.2:8080';
+  String backendUrl = 'nicolas-dutronc-shoppinglist.herokuapp.com';
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(
     MultiProvider(
