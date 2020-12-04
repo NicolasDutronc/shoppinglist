@@ -52,6 +52,12 @@ class MemoryListsRepository extends ListsRepository {
   }
 
   @override
+  Future<int> delete(ShoppingList list) {
+    lists.remove(list.id);
+    return Future<int>.delayed(Duration(milliseconds: 500), () => 1);
+  }
+
+  @override
   Future<int> toggleItem(ShoppingList list, Item item) {
     lists[list.id].items.map((e) => e == item
         ? Item(
