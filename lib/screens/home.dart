@@ -57,11 +57,16 @@ class _HomeState extends State<Home> {
           // error fetching lists
           if (state is ListsLoadFailure) {
             return RefreshIndicator(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(state.error),
-                ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(state.error),
+                    ),
+                  ),
+                  ListView(),
+                ],
               ),
               onRefresh: () {
                 BlocProvider.of<ListsBloc>(context).add(ListsLoadSuccess());
@@ -74,11 +79,22 @@ class _HomeState extends State<Home> {
           if (state is ListsLoadSuccessState) {
             // empty list
             if (state.lists.length == 0) {
-              return Center(
-                child: Text(
-                  "Pas de liste de courses",
-                  style: TextStyle(color: Colors.grey[600]),
+              return RefreshIndicator(
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Text(
+                        "Pas de liste de courses",
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    ListView(),
+                  ],
                 ),
+                onRefresh: () {
+                  BlocProvider.of<ListsBloc>(context).add(ListsLoadSuccess());
+                  return _refreshCompleter.future;
+                },
               );
             }
 
@@ -110,6 +126,34 @@ class _HomeState extends State<Home> {
                                 .add(ListsLoadSuccess());
                           });
                         },
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text("Supprimer la liste ?"),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("Annuler"),
+                                    ),
+                                    FlatButton(
+                                        onPressed: () {
+                                          BlocProvider.of<ListsBloc>(context)
+                                              .add(ListDeleted(list: list));
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Confirmer"))
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     );
                   },

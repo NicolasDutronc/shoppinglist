@@ -67,6 +67,23 @@ class ListsBloc extends Bloc<ListsEvent, ListsState> {
 
         yield ListsLoadSuccessState(lists: currentList);
       }
+    } else if (event is ListDeleted) {
+      // retrieve lists from state
+      final currentLists = (state as ListsLoadSuccessState).lists;
+      if (state is ListsLoadSuccessState) {
+        yield ListsLoadInProgress();
+        try {
+          await listRepository.delete(event.list);
+          // add the new list locally
+          final List<ShoppingList> updatedLists = List.from(currentLists)
+            ..remove(event.list);
+
+          // send new state with the updated lists
+          yield ListsLoadSuccessState(lists: updatedLists);
+        } catch (e) {
+          yield ListsLoadFailure(error: e.toString());
+        }
+      }
     }
   }
 }
