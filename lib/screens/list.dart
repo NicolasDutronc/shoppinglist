@@ -106,11 +106,16 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Widget _buildEmptyListScreen() {
-    return Center(
-      child: Text(
-        "La liste de course est vide.",
-        style: TextStyle(color: Colors.grey[600]),
-      ),
+    return Stack(
+      children: [
+        Center(
+          child: Text(
+            "La liste de course est vide.",
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ),
+        ListView(),
+      ],
     );
   }
 
@@ -147,27 +152,28 @@ class _ListScreenState extends State<ListScreen> {
               ),
               onPressed: () {
                 showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text("Supprimer toute la liste ?"),
-                        actions: <Widget>[
-                          FlatButton(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text("Supprimer tous les articles ?"),
+                      actions: <Widget>[
+                        FlatButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("Annuler"),
+                        ),
+                        FlatButton(
                             onPressed: () {
+                              BlocProvider.of<ShoppingListBloc>(context)
+                                  .add(DeleteAllItemsEvent());
                               Navigator.of(context).pop();
                             },
-                            child: Text("Annuler"),
-                          ),
-                          FlatButton(
-                              onPressed: () {
-                                BlocProvider.of<ShoppingListBloc>(context)
-                                    .add(DeleteAllItemsEvent());
-                                Navigator.of(context).pop();
-                              },
-                              child: Text("Confirmer"))
-                        ],
-                      );
-                    });
+                            child: Text("Confirmer"))
+                      ],
+                    );
+                  },
+                );
               },
             ),
           )
