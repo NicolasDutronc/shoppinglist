@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:shoplist/lists/models/item.dart';
-import 'package:shoplist/lists/models/list.dart';
 
 abstract class ListEvent extends Equatable {
   const ListEvent();
