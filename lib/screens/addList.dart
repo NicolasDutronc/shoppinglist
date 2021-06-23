@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shoplist/lists/lists/bloc.dart';
-import 'package:shoplist/lists/lists/events.dart';
+import 'package:shoppinglist/inventory/cubit.dart';
 
 class AddListForm extends StatefulWidget {
   @override
@@ -48,7 +47,7 @@ class AddListFormState extends State<AddListForm> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 // Cancel button
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -56,15 +55,18 @@ class AddListFormState extends State<AddListForm> {
                     "Annuler",
                     style: TextStyle(color: Colors.white),
                   ),
-                  color: Colors.red,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                  ),
                 ),
 
                 // Add button
-                RaisedButton(
+                ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState.validate()) {
-                      BlocProvider.of<ListsBloc>(context)
-                          .add(ListAdded(name: nameController.text));
+                      context
+                          .read<InventoryCubit>()
+                          .addList(listName: nameController.text);
                       Navigator.of(context).pop();
                     }
                   },
@@ -72,7 +74,9 @@ class AddListFormState extends State<AddListForm> {
                     "Créer",
                     style: TextStyle(color: Colors.white),
                   ),
-                  color: Colors.blue,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                  ),
                 )
               ],
             ),

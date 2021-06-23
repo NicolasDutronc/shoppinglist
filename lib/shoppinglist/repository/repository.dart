@@ -1,11 +1,13 @@
-import 'package:shoppinglist/lists/models/item.dart';
-import 'package:shoppinglist/lists/models/list.dart';
+import 'package:shoppinglist/inventory/models/ListSummary.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
+import 'package:shoppinglist/shoppinglist/models/shoppinglist.dart';
 
-abstract class ListsRepository {
+abstract class ShoppinglistRepository {
   Future<List<ShoppingList>> findAll();
+  Future<List<ListSummary>> getInventory();
   Future<ShoppingList> findById(String id);
   Future<ShoppingList> store(String name);
-  Future<int> delete(ShoppingList list);
+  Future<int> delete(String id);
   Future<Item> addItem(ShoppingList list, Item item);
   Future<int> updateItem(
       ShoppingList list, Item item, String newName, String newQuantity);

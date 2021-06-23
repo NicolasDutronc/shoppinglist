@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:shoplist/users/authentication/bloc.dart';
-import 'package:shoplist/users/authentication/events.dart';
-import 'package:shoplist/users/repository/repository.dart';
+import 'package:shoppinglist/users/authentication/bloc.dart';
+import 'package:shoppinglist/users/authentication/events.dart';
+import 'package:shoppinglist/users/repository/repository.dart';
 
 class HubClient {
   final UserRepository userRepository;

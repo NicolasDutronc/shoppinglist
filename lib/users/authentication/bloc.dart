@@ -1,14 +1,15 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:shoplist/users/authentication/events.dart';
-import 'package:shoplist/users/authentication/states.dart';
-import 'package:shoplist/users/repository/repository.dart';
+import 'package:shoppinglist/users/authentication/events.dart';
+import 'package:shoppinglist/users/authentication/states.dart';
+import 'package:shoppinglist/users/repository/repository.dart';
 
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticateState> {
   final UserRepository userRepository;
 
   AuthenticationBloc({@required this.userRepository})
-      : assert(userRepository != null);
+      : assert(userRepository != null),
+        super(null);
 
   @override
   AuthenticateState get initialState => AuthenticationUninitialised();

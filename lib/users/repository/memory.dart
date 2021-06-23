@@ -1,9 +1,12 @@
-import 'package:shoplist/users/repository/repository.dart';
+import 'package:shoppinglist/users/repository/repository.dart';
 
 class MemoryUserRepository extends UserRepository {
   @override
   Future<String> authenticate({String username, String password}) async {
     await Future.delayed(Duration(seconds: 1));
-    return 'token';
+    if (username == 'admin' && password == 'admin') {
+      return 'token';
+    }
+    throw Exception('Failed to authenticate');
   }
 }

@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:shoplist/users/authentication/bloc.dart';
-import 'package:shoplist/users/authentication/events.dart';
-import 'package:shoplist/users/repository/repository.dart';
+import 'package:shoppinglist/users/authentication_cubit/cubit.dart';
+import 'package:shoppinglist/users/repository/repository.dart';
 
 Future<Dio> configureDio(String baseUrl, UserRepository userRepository,
-    AuthenticationBloc authenticationBloc) async {
+    AuthenticationCubit authenticationCubit) async {
   var dio = Dio(BaseOptions(
     baseUrl: baseUrl,
   ));
@@ -16,7 +15,7 @@ Future<Dio> configureDio(String baseUrl, UserRepository userRepository,
       try {
         token = await userRepository.getToken();
       } catch (e) {
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         handler.reject(e);
       }
 
@@ -27,7 +26,7 @@ Future<Dio> configureDio(String baseUrl, UserRepository userRepository,
     onResponse: (response, handler) async {
       switch (response.statusCode) {
         case 401:
-          authenticationBloc.add(LoggedOut());
+          authenticationCubit.logOut();
           handler.reject(Exception("Unauthenticated"));
           break;
         case 403:
@@ -38,4 +37,6 @@ Future<Dio> configureDio(String baseUrl, UserRepository userRepository,
       handler.next(response);
     },
   ));
+
+  return dio;
 }

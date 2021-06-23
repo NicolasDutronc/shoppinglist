@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shoplist/lists/list/bloc.dart';
-import 'package:shoplist/lists/list/events.dart';
-import 'package:shoplist/lists/list/states.dart';
-import 'package:shoplist/lists/models/item.dart';
-import 'package:shoplist/lists/models/list.dart';
-import 'package:shoplist/screens/editItem.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
+import 'package:shoppinglist/shoppinglist/models/shoppinglist.dart';
+import 'package:shoppinglist/screens/editItem.dart';
+import 'package:shoppinglist/shoppinglist/cubit.dart';
+import 'package:shoppinglist/shoppinglist/states.dart';
 
 import 'addItem.dart';
 
@@ -28,15 +27,15 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ShoppingListBloc, ListState>(
+    return BlocConsumer<ShoppinglistCubit, ShoppinglistState>(
       listener: (context, state) {
-        if (state is ListLoadSuccess) {
+        if (state is ShoppinglistLoaded) {
           _refreshCompleter?.complete();
           _refreshCompleter = Completer<void>();
         }
       },
       builder: (context, state) {
-        if (state is ListLoadInProgress) {
+        if (state is ShoppinglistLoading) {
           return Scaffold(
             appBar: AppBar(
               title: Text('Loading...'),
@@ -45,7 +44,7 @@ class _ListScreenState extends State<ListScreen> {
           );
         }
 
-        if (state is ListLoadSuccessState) {
+        if (state is ShoppinglistLoaded) {
           return RefreshIndicator(
             child: Scaffold(
               appBar: AppBar(
@@ -64,8 +63,7 @@ class _ListScreenState extends State<ListScreen> {
               backgroundColor: Colors.grey[200],
             ),
             onRefresh: () {
-              BlocProvider.of<ShoppingListBloc>(context)
-                  .add(ListLoadSuccess(listId: state.list.id));
+              context.read<ShoppinglistCubit>().loadShoppinglist(state.list.id);
               return _refreshCompleter.future;
             },
           );
@@ -94,11 +92,12 @@ class _ListScreenState extends State<ListScreen> {
             context,
           );
         }
+
         itemIndex--;
 
         // build list items
         if (itemIndex < list.items.length) {
-          return _buildItem(context, list.items[itemIndex]);
+          return _buildItem(context, list.items[itemIndex], itemIndex);
         }
         return null;
       },
@@ -145,7 +144,7 @@ class _ListScreenState extends State<ListScreen> {
             flex: 4,
           ),
           Expanded(
-            child: FlatButton(
+            child: TextButton(
               child: Icon(
                 Icons.remove_shopping_cart,
                 color: Colors.grey[800],
@@ -157,16 +156,17 @@ class _ListScreenState extends State<ListScreen> {
                     return AlertDialog(
                       title: Text("Supprimer tous les articles ?"),
                       actions: <Widget>[
-                        FlatButton(
+                        TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                           child: Text("Annuler"),
                         ),
-                        FlatButton(
+                        TextButton(
                             onPressed: () {
-                              BlocProvider.of<ShoppingListBloc>(context)
-                                  .add(DeleteAllItemsEvent());
+                              context
+                                  .read<ShoppinglistCubit>()
+                                  .deleteAllItems();
                               Navigator.of(context).pop();
                             },
                             child: Text("Confirmer"))
@@ -182,7 +182,7 @@ class _ListScreenState extends State<ListScreen> {
     );
   }
 
-  Widget _buildItem(BuildContext context, Item item) {
+  Widget _buildItem(BuildContext context, Item item, int index) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -214,27 +214,28 @@ class _ListScreenState extends State<ListScreen> {
         Expanded(
           child: Checkbox(
             value: item.done,
-            onChanged: (value) => BlocProvider.of<ShoppingListBloc>(context)
-                .add(ItemToggledEvent(item: item)),
+            onChanged: (value) => context
+                .read<ShoppinglistCubit>()
+                .toggleItem(item: item, index: index),
           ),
           // decoration: BoxDecoration(border: Border.all()),
         ),
         Expanded(
-          child: FlatButton(
+          child: TextButton(
             child: Icon(
               Icons.edit,
               color: Colors.grey[800],
             ),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (context) {
-                return EditItem(item: item);
+                return EditItem(item: item, index: index);
               }),
             ),
           ),
           // decoration: BoxDecoration(border: Border.all()),
         ),
         Expanded(
-          child: FlatButton(
+          child: TextButton(
             child: Icon(
               Icons.remove,
               color: Colors.grey[800],
@@ -246,19 +247,21 @@ class _ListScreenState extends State<ListScreen> {
                     return AlertDialog(
                       title: Text("Supprimer ${item.name} de la liste ?"),
                       actions: <Widget>[
-                        FlatButton(
+                        TextButton(
+                          child: Text("Annuler"),
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: Text("Annuler"),
                         ),
-                        FlatButton(
-                            onPressed: () {
-                              BlocProvider.of<ShoppingListBloc>(context)
-                                  .add(ItemDeletedEvent(item: item));
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("Confirmer"))
+                        TextButton(
+                          child: Text("Confirmer"),
+                          onPressed: () {
+                            context
+                                .read<ShoppinglistCubit>()
+                                .deleteItem(item: item);
+                            Navigator.of(context).pop();
+                          },
+                        )
                       ],
                     );
                   });

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shoplist/lists/list/bloc.dart';
-import 'package:shoplist/lists/list/events.dart';
-import 'package:shoplist/lists/models/item.dart';
+import 'package:shoppinglist/shoppinglist/cubit.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
 
 class EditItem extends StatefulWidget {
   final Item item;
+  final int index;
 
-  EditItem({this.item});
+  EditItem({this.item, this.index});
 
   @override
   State<StatefulWidget> createState() {
@@ -78,28 +78,28 @@ class EditItemState extends State<EditItem> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   // Cancel button
-                  RaisedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                  ElevatedButton(
                     child: Text(
                       "Annuler",
                       style: TextStyle(color: Colors.white),
                     ),
-                    color: Colors.red,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                    ),
                   ),
 
-                  // Add button
-                  RaisedButton(
+                  // Update button
+                  ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState.validate()) {
-                        BlocProvider.of<ShoppingListBloc>(context).add(
-                          ItemUpdatedEvent(
-                            item: widget.item,
-                            newName: nameController.text,
-                            newQuantity: quantityController.text,
-                          ),
-                        );
+                        context.read<ShoppinglistCubit>().updateItem(
+                              index: widget.index,
+                              newName: nameController.text,
+                              newQuantity: quantityController.text,
+                            );
                         Navigator.of(context).pop();
                       }
                     },
@@ -107,7 +107,9 @@ class EditItemState extends State<EditItem> {
                       "Modifier",
                       style: TextStyle(color: Colors.white),
                     ),
-                    color: Colors.blue,
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                    ),
                   )
                 ],
               ),

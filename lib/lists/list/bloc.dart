@@ -1,26 +1,23 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:shoplist/lists/list/events.dart';
-import 'package:shoplist/lists/list/states.dart';
-import 'package:shoplist/lists/lists/bloc.dart';
-import 'package:shoplist/lists/lists/events.dart';
-import 'package:shoplist/lists/models/item.dart';
-import 'package:shoplist/lists/models/list.dart';
+import 'package:shoppinglist/lists/list/events.dart';
+import 'package:shoppinglist/lists/list/states.dart';
+import 'package:shoppinglist/lists/lists/bloc.dart';
+import 'package:shoppinglist/lists/lists/events.dart';
+import 'package:shoppinglist/lists/models/item.dart';
+import 'package:shoppinglist/lists/models/list.dart';
 
 class ShoppingListBloc extends Bloc<ListEvent, ListState> {
   final ListsBloc listsBloc;
 
   ShoppingListBloc({
     @required this.listsBloc,
-  });
-
-  @override
-  ListState get initialState => ListLoadInProgress();
+  }) : super(ListLoadInProgress());
 
   @override
   Stream<ListState> mapEventToState(ListEvent event) async* {
     // load success
-    if (event is ListLoadSuccess) {
+    if (event is ListLoadRequest) {
       yield ListLoadInProgress();
       try {
         final list = await listsBloc.listRepository.findById(event.listId);

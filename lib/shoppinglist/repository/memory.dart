@@ -1,11 +1,12 @@
-import 'package:shoppinglist/lists/models/list.dart';
-import 'package:shoppinglist/lists/models/item.dart';
-import 'package:shoppinglist/lists/repository/repository.dart';
+import 'package:shoppinglist/inventory/models/ListSummary.dart';
+import 'package:shoppinglist/shoppinglist/models/shoppinglist.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
+import 'package:shoppinglist/shoppinglist/repository/repository.dart';
 
-class MemoryListsRepository extends ListsRepository {
+class MemoryListRepository extends ShoppinglistRepository {
   Map<String, ShoppingList> lists;
 
-  MemoryListsRepository() {
+  MemoryListRepository() {
     lists = Map<String, ShoppingList>();
   }
 
@@ -35,6 +36,16 @@ class MemoryListsRepository extends ListsRepository {
   }
 
   @override
+  Future<List<ListSummary>> getInventory() async {
+    return Future<List<ListSummary>>.delayed(
+        Duration(milliseconds: 500),
+        () => lists.values
+            .toList()
+            .map((list) => ListSummary.from(shoppinglist: list))
+            .toList());
+  }
+
+  @override
   Future<ShoppingList> findById(String id) {
     return Future<ShoppingList>.delayed(
         Duration(milliseconds: 500), () => lists[id]);
@@ -52,8 +63,8 @@ class MemoryListsRepository extends ListsRepository {
   }
 
   @override
-  Future<int> delete(ShoppingList list) {
-    lists.remove(list.id);
+  Future<int> delete(String id) {
+    lists.remove(id);
     return Future<int>.delayed(Duration(milliseconds: 500), () => 1);
   }
 

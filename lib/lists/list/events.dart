@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:shoplist/lists/models/item.dart';
+import 'package:shoppinglist/lists/models/item.dart';
 
 abstract class ListEvent extends Equatable {
   const ListEvent();
@@ -9,10 +9,10 @@ abstract class ListEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class ListLoadSuccess extends ListEvent {
+class ListLoadRequest extends ListEvent {
   final String listId;
 
-  const ListLoadSuccess({@required this.listId});
+  const ListLoadRequest({@required this.listId});
 
   @override
   List<Object> get props => [listId];

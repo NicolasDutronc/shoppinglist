@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:shoppinglist/lists/models/item.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
 
 class ShoppingList extends Equatable {
   final String name;

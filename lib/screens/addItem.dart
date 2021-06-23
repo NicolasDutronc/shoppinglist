@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shoplist/lists/list/bloc.dart';
-import 'package:shoplist/lists/list/events.dart';
-import 'package:shoplist/lists/models/item.dart';
+import 'package:shoppinglist/lists/list/bloc.dart';
+import 'package:shoppinglist/lists/list/events.dart';
+import 'package:shoppinglist/shoppinglist/cubit.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
 
 class AddItemForm extends StatefulWidget {
   @override
@@ -80,31 +81,30 @@ class _AddItemFormState extends State<AddItemForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     // Cancel button
-                    RaisedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                    ElevatedButton(
                       child: Text(
                         "Annuler",
                         style: TextStyle(color: Colors.white),
                       ),
-                      color: Colors.red,
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.red,
+                      ),
                     ),
 
                     // Add button
-                    RaisedButton(
+                    ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState.validate()) {
-                          BlocProvider.of<ShoppingListBloc>(context).add(
-                            ItemAddedEvent(
-                              item: Item(
-                                name: nameController.text,
-                                quantity: quantityController.text,
-                                done: false,
-                              ),
-                            ),
-                          );
-
+                          context.read<ShoppinglistCubit>().addItem(
+                                item: Item(
+                                  name: nameController.text,
+                                  quantity: quantityController.text,
+                                  done: false,
+                                ),
+                              );
                           Navigator.of(context).pop();
                         }
                       },
@@ -112,7 +112,9 @@ class _AddItemFormState extends State<AddItemForm> {
                         "Ajouter",
                         style: TextStyle(color: Colors.white),
                       ),
-                      color: Colors.blue,
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                      ),
                     )
                   ],
                 ),

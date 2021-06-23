@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:shoplist/users/authentication/bloc.dart';
-import 'package:shoplist/users/authentication/events.dart';
-import 'package:shoplist/users/login/events.dart';
-import 'package:shoplist/users/login/states.dart';
-import 'package:shoplist/users/repository/repository.dart';
+import 'package:shoppinglist/users/authentication/bloc.dart';
+import 'package:shoppinglist/users/authentication/events.dart';
+import 'package:shoppinglist/users/login/events.dart';
+import 'package:shoppinglist/users/login/states.dart';
+import 'package:shoppinglist/users/repository/repository.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final UserRepository userRepository;
@@ -14,7 +14,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     @required this.userRepository,
     @required this.authenticationBloc,
   })  : assert(userRepository != null),
-        assert(authenticationBloc != null);
+        assert(authenticationBloc != null),
+        super(null);
 
   @override
   LoginState get initialState => LoginInitial();

@@ -1,17 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:shoplist/lists/lists/events.dart';
-import 'package:shoplist/lists/lists/states.dart';
-import 'package:shoplist/lists/models/list.dart';
-import 'package:shoplist/lists/repository/repository.dart';
+import 'package:shoppinglist/lists/lists/events.dart';
+import 'package:shoppinglist/lists/lists/states.dart';
+import 'package:shoppinglist/lists/models/list.dart';
+import 'package:shoppinglist/lists/repository/repository.dart';
 
 class ListsBloc extends Bloc<ListsEvent, ListsState> {
   final ListsRepository listRepository;
 
-  ListsBloc({@required this.listRepository});
-
-  @override
-  ListsState get initialState => ListsLoadInProgress();
+  ListsBloc({@required this.listRepository}) : super(ListsLoadInProgress());
 
   @override
   Stream<ListsState> mapEventToState(ListsEvent event) async* {
@@ -74,7 +71,7 @@ class ListsBloc extends Bloc<ListsEvent, ListsState> {
         yield ListsLoadInProgress();
         try {
           await listRepository.delete(event.list);
-          // add the new list locally
+          // remove the new list locally
           final List<ShoppingList> updatedLists = List.from(currentLists)
             ..remove(event.list);
 

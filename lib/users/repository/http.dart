@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:shoplist/users/repository/repository.dart';
+import 'package:shoppinglist/users/repository/repository.dart';
 
 class HttpUserRepository extends UserRepository {
   final String url;

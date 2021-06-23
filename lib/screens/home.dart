@@ -3,15 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shoplist/components/appbar.dart';
-import 'package:shoplist/lists/list/bloc.dart';
-import 'package:shoplist/lists/list/events.dart';
-import 'package:shoplist/lists/lists/bloc.dart';
-import 'package:shoplist/lists/lists/events.dart';
-import 'package:shoplist/lists/lists/states.dart';
-import 'package:shoplist/lists/models/list.dart';
-import 'package:shoplist/screens/addList.dart';
-import 'package:shoplist/screens/list.dart';
+import 'package:shoppinglist/components/appbar.dart';
+import 'package:shoppinglist/inventory/cubit.dart';
+import 'package:shoppinglist/inventory/models/ListSummary.dart';
+import 'package:shoppinglist/inventory/states.dart';
+import 'package:shoppinglist/screens/addList.dart';
+import 'package:shoppinglist/screens/list.dart';
+import 'package:shoppinglist/shoppinglist/cubit.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -39,23 +37,23 @@ class _HomeState extends State<Home> {
         },
         child: Icon(Icons.add),
       ),
-      body: BlocConsumer<ListsBloc, ListsState>(
+      body: BlocConsumer<InventoryCubit, InventoryState>(
         listener: (context, state) {
-          if (state is ListsLoadSuccessState) {
+          if (state is InventoryLoaded) {
             _refreshCompleter?.complete();
             _refreshCompleter = Completer<void>();
           }
         },
         builder: (context, state) {
           // loading
-          if (state is ListsLoadInProgress) {
+          if (state is InventoryLoading) {
             return Center(
               child: CircularProgressIndicator(),
             );
           }
 
           // error fetching lists
-          if (state is ListsLoadFailure) {
+          if (state is InventoryLoadFailed) {
             return RefreshIndicator(
               child: Stack(
                 children: [
@@ -69,16 +67,16 @@ class _HomeState extends State<Home> {
                 ],
               ),
               onRefresh: () {
-                BlocProvider.of<ListsBloc>(context).add(ListsLoadSuccess());
+                context.read<InventoryCubit>().loadInventory();
                 return _refreshCompleter.future;
               },
             );
           }
 
           // lists fetched successfully
-          if (state is ListsLoadSuccessState) {
+          if (state is InventoryLoaded) {
             // empty list
-            if (state.lists.length == 0) {
+            if (state.inventory.length == 0) {
               return RefreshIndicator(
                 child: Stack(
                   children: [
@@ -92,7 +90,7 @@ class _HomeState extends State<Home> {
                   ],
                 ),
                 onRefresh: () {
-                  BlocProvider.of<ListsBloc>(context).add(ListsLoadSuccess());
+                  context.read<InventoryCubit>().loadInventory();
                   return _refreshCompleter.future;
                 },
               );
@@ -102,28 +100,27 @@ class _HomeState extends State<Home> {
                 child: ListView.separated(
                   separatorBuilder: (BuildContext context, int index) =>
                       const Divider(),
-                  itemCount: state.lists.length,
+                  itemCount: state.inventory.length,
                   padding: const EdgeInsets.all(15.0),
                   itemBuilder: (BuildContext context, int index) {
-                    ShoppingList list = state.lists[index];
-                    int n = list.items.length;
+                    ListSummary summary = state.inventory[index];
+                    int n = summary.length;
 
                     return Card(
                       child: ListTile(
-                        title: Text(list.name),
+                        title: Text(summary.name),
                         subtitle: Text(n > 1 ? "$n articles" : "$n article"),
                         onTap: () {
-                          BlocProvider.of<ShoppingListBloc>(context)
-                              .add(ListLoadSuccess(listId: list.id));
+                          context
+                              .read<ShoppinglistCubit>()
+                              .loadShoppinglist(summary.id);
+
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (context) {
-                              // BlocProvider.of<ShoppingListBloc>(context)
-                              //     .add(ListLoadSuccess(list: state.lists[index]));
                               return ListScreen();
                             }),
                           ).then((value) {
-                            BlocProvider.of<ListsBloc>(context)
-                                .add(ListsLoadSuccess());
+                            context.read<InventoryCubit>().loadInventory();
                           });
                         },
                         trailing: IconButton(
@@ -135,19 +132,21 @@ class _HomeState extends State<Home> {
                                 return AlertDialog(
                                   title: Text("Supprimer la liste ?"),
                                   actions: <Widget>[
-                                    FlatButton(
+                                    TextButton(
+                                      child: Text("Annuler"),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
-                                      child: Text("Annuler"),
                                     ),
-                                    FlatButton(
-                                        onPressed: () {
-                                          BlocProvider.of<ListsBloc>(context)
-                                              .add(ListDeleted(list: list));
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("Confirmer"))
+                                    TextButton(
+                                      child: Text("Confirmer"),
+                                      onPressed: () {
+                                        context
+                                            .read<InventoryCubit>()
+                                            .deleteList(index: index);
+                                        Navigator.of(context).pop();
+                                      },
+                                    )
                                   ],
                                 );
                               },
@@ -159,7 +158,7 @@ class _HomeState extends State<Home> {
                   },
                 ),
                 onRefresh: () {
-                  BlocProvider.of<ListsBloc>(context).add(ListsLoadSuccess());
+                  context.read<InventoryCubit>().loadInventory();
                   return _refreshCompleter.future;
                 });
           }

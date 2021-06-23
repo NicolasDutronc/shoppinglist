@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:shoplist/hub/messages.dart';
+import 'package:shoppinglist/hub/messages.dart';
 
 class HubClient {
   final String _baseUrl;

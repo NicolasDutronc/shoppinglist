@@ -2,22 +2,22 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:shoppinglist/lists/repository/repository.dart';
-import 'package:shoppinglist/users/authentication/bloc.dart';
+import 'package:shoppinglist/inventory/models/ListSummary.dart';
+import 'package:shoppinglist/shoppinglist/repository/repository.dart';
+import 'package:shoppinglist/users/authentication_cubit/cubit.dart';
 import 'package:shoppinglist/users/repository/repository.dart';
-import 'package:shoppinglist/lists/models/item.dart';
-import 'package:shoppinglist/lists/models/list.dart';
-import 'package:shoppinglist/users/authentication/events.dart';
+import 'package:shoppinglist/shoppinglist/models/item.dart';
+import 'package:shoppinglist/shoppinglist/models/shoppinglist.dart';
 
-class HttpListRepository extends ListsRepository {
+class HttpListRepository extends ShoppinglistRepository {
   final UserRepository userRepository;
-  final AuthenticationBloc authenticationBloc;
+  final AuthenticationCubit authenticationCubit;
   final String url;
   HttpClient _client;
 
   HttpListRepository({
     @required this.url,
-    @required this.authenticationBloc,
+    @required this.authenticationCubit,
     @required this.userRepository,
   }) {
     this._client = new HttpClient()
@@ -31,7 +31,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -54,7 +54,44 @@ class HttpListRepository extends ListsRepository {
             .map((listJson) => ShoppingList.fromJson(listJson))
             .toList();
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
+        return null;
+      default:
+        throw Exception(
+            "Unexpected status code : " + response.statusCode.toString());
+    }
+  }
+
+  @override
+  Future<List<ListSummary>> getInventory() async {
+    String token;
+    try {
+      token = await userRepository.getToken();
+    } catch (e) {
+      authenticationCubit.logOut();
+      return null;
+    }
+
+    HttpClientRequest req =
+        await _client.getUrl(Uri.https(url, '/api/v1/lists/inventory'));
+
+    req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+
+    HttpClientResponse response = await req.close();
+
+    switch (response.statusCode) {
+      case 200:
+        var rawBody = await response
+            .transform(utf8.decoder)
+            .join()
+            .then((value) => jsonDecode(value));
+
+        var rawList = rawBody['inventory'] as List;
+        return rawList
+            .map((listJson) => ListSummary.fromJson(listJson))
+            .toList();
+      case 401:
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -68,7 +105,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -88,7 +125,7 @@ class HttpListRepository extends ListsRepository {
         var createdList = ShoppingList.fromJson(rawBody["list"]);
         return createdList;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -102,7 +139,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -125,7 +162,7 @@ class HttpListRepository extends ListsRepository {
         var createdList = ShoppingList.fromJson(rawBody["list"]);
         return createdList;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -134,17 +171,17 @@ class HttpListRepository extends ListsRepository {
   }
 
   @override
-  Future<int> delete(ShoppingList list) async {
+  Future<int> delete(String id) async {
     String token;
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
     HttpClientRequest req =
-        await _client.deleteUrl(Uri.https(url, '/api/v1/lists/${list.id}'));
+        await _client.deleteUrl(Uri.https(url, '/api/v1/lists/$id'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
     HttpClientResponse response = await req.close();
@@ -158,7 +195,7 @@ class HttpListRepository extends ListsRepository {
         var numberOfDeleted = rawBody['number_of_deleted'];
         return numberOfDeleted;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -172,7 +209,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -196,7 +233,7 @@ class HttpListRepository extends ListsRepository {
         var addedItem = Item.fromJson(rawBody["item"]);
         return addedItem;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -211,7 +248,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -237,7 +274,7 @@ class HttpListRepository extends ListsRepository {
         var numberOfUpdated = rawBody['number_of_updated'];
         return numberOfUpdated;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -251,7 +288,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -275,7 +312,7 @@ class HttpListRepository extends ListsRepository {
         var numberOfDeleted = rawBody['number_of_deleted'];
         return numberOfDeleted;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -289,7 +326,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -314,7 +351,7 @@ class HttpListRepository extends ListsRepository {
         var numberOfToggled = rawBody['number_of_toggled'];
         return numberOfToggled;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
@@ -328,7 +365,7 @@ class HttpListRepository extends ListsRepository {
     try {
       token = await userRepository.getToken();
     } catch (e) {
-      authenticationBloc.add(LoggedOut());
+      authenticationCubit.logOut();
       return null;
     }
 
@@ -347,7 +384,7 @@ class HttpListRepository extends ListsRepository {
         var numberOfDeleted = rawBody['number_of_deleted'];
         return numberOfDeleted;
       case 401:
-        authenticationBloc.add(LoggedOut());
+        authenticationCubit.logOut();
         return null;
       default:
         throw Exception(
