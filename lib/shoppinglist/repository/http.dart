@@ -13,16 +13,26 @@ class HttpListRepository extends ShoppinglistRepository {
   final UserRepository userRepository;
   final AuthenticationCubit authenticationCubit;
   final String url;
+  final bool tls;
   HttpClient _client;
 
   HttpListRepository({
     @required this.url,
+    @required this.tls,
     @required this.authenticationCubit,
     @required this.userRepository,
   }) {
     this._client = new HttpClient()
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
+  }
+
+  Uri makeUri(String path) {
+    if (tls) {
+      return makeUri(path);
+    } else {
+      return Uri.http(url, path);
+    }
   }
 
   @override
@@ -35,8 +45,7 @@ class HttpListRepository extends ShoppinglistRepository {
       return null;
     }
 
-    HttpClientRequest req =
-        await _client.getUrl(Uri.https(url, '/api/v1/lists'));
+    HttpClientRequest req = await _client.getUrl(makeUri('/api/v1/lists'));
 
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
@@ -72,8 +81,7 @@ class HttpListRepository extends ShoppinglistRepository {
       return null;
     }
 
-    HttpClientRequest req =
-        await _client.getUrl(Uri.https(url, '/api/v1/lists/inventory'));
+    HttpClientRequest req = await _client.getUrl(makeUri('/api/v1/inventory'));
 
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
@@ -109,8 +117,7 @@ class HttpListRepository extends ShoppinglistRepository {
       return null;
     }
 
-    HttpClientRequest req =
-        await _client.getUrl(Uri.https(url, '/api/v1/lists/$id'));
+    HttpClientRequest req = await _client.getUrl(makeUri('/api/v1/lists/$id'));
 
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
@@ -143,8 +150,7 @@ class HttpListRepository extends ShoppinglistRepository {
       return null;
     }
 
-    HttpClientRequest req =
-        await _client.postUrl(Uri.https(url, '/api/v1/lists'));
+    HttpClientRequest req = await _client.postUrl(makeUri('/api/v1/lists'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -181,7 +187,7 @@ class HttpListRepository extends ShoppinglistRepository {
     }
 
     HttpClientRequest req =
-        await _client.deleteUrl(Uri.https(url, '/api/v1/lists/$id'));
+        await _client.deleteUrl(makeUri('/api/v1/lists/$id'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
     HttpClientResponse response = await req.close();
@@ -214,7 +220,7 @@ class HttpListRepository extends ShoppinglistRepository {
     }
 
     HttpClientRequest req =
-        await _client.postUrl(Uri.https(url, '/api/v1/lists/${list.id}'));
+        await _client.postUrl(makeUri('/api/v1/lists/${list.id}'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -253,7 +259,7 @@ class HttpListRepository extends ShoppinglistRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}'));
+        await _client.putUrl(makeUri('/api/v1/lists/${list.id}'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -293,7 +299,7 @@ class HttpListRepository extends ShoppinglistRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}/delete'));
+        await _client.putUrl(makeUri('/api/v1/lists/${list.id}/delete'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -331,7 +337,7 @@ class HttpListRepository extends ShoppinglistRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}/toggle'));
+        await _client.putUrl(makeUri('/api/v1/lists/${list.id}/toggle'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
@@ -370,7 +376,7 @@ class HttpListRepository extends ShoppinglistRepository {
     }
 
     HttpClientRequest req =
-        await _client.putUrl(Uri.https(url, '/api/v1/lists/${list.id}/clear'));
+        await _client.putUrl(makeUri('/api/v1/lists/${list.id}/clear'));
     req.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
 
     HttpClientResponse response = await req.close();

@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:shoppinglist/inventory/cubit.dart';
-import 'package:shoppinglist/lists/list/bloc.dart';
-import 'package:shoppinglist/lists/lists/bloc.dart';
-import 'package:shoppinglist/lists/lists/events.dart';
-import 'package:shoppinglist/lists/repository/http.dart';
-import 'package:shoppinglist/lists/repository/repository.dart';
+import 'package:shoppinglist/shoppinglist/repository/http.dart';
 import 'package:shoppinglist/screens/home.dart';
 import 'package:shoppinglist/shoppinglist/cubit.dart';
 import 'package:shoppinglist/shoppinglist/repository/memory.dart';
 import 'package:shoppinglist/shoppinglist/repository/repository.dart';
-import 'package:shoppinglist/users/authentication/bloc.dart';
 import 'package:shoppinglist/users/authentication_cubit/states.dart';
 import 'package:shoppinglist/users/authentication_cubit/cubit.dart';
 import 'package:shoppinglist/screens/login.dart';
@@ -22,7 +17,7 @@ import 'package:shoppinglist/users/repository/repository.dart';
 
 void main() {
   Bloc.observer = SimpleBlocObserver();
-  runApp(InMemoryApp());
+  runApp(HttpApp());
 }
 
 class HttpApp extends StatelessWidget {
@@ -30,35 +25,40 @@ class HttpApp extends StatelessWidget {
   Widget build(BuildContext context) {
     print('kReleaseMode: $kReleaseMode');
     // String backendUrl = '10.0.2.2:8080';
-    String backendUrl = 'nicolas-dutronc-shoppinglist.herokuapp.com';
+    String backendUrl = '127.0.0.1:8080';
+    // String backendUrl = 'nicolas-dutronc-shoppinglist.herokuapp.com';
+
+    bool tls = kReleaseMode;
 
     return MultiProvider(
       providers: [
         RepositoryProvider<UserRepository>(
           create: (context) => HttpUserRepository(
             url: backendUrl,
+            tls: tls,
           ),
         ),
         BlocProvider<AuthenticationCubit>(
           create: (context) => AuthenticationCubit(
-            userRepository: context.read<UserRepository>(),
-          ),
+            userRepository: context.read(),
+          )..checkLoggedIn(),
         ),
-        RepositoryProvider<ListsRepository>(
+        RepositoryProvider<ShoppinglistRepository>(
           create: (context) => HttpListRepository(
             url: backendUrl,
-            authenticationBloc: BlocProvider.of<AuthenticationBloc>(context),
-            userRepository: RepositoryProvider.of<UserRepository>(context),
+            tls: tls,
+            authenticationCubit: context.read(),
+            userRepository: context.read(),
           ),
         ),
-        BlocProvider<ListsBloc>(
-          create: (context) => ListsBloc(
-            listRepository: RepositoryProvider.of<ListsRepository>(context),
-          )..add(ListsLoadSuccess()),
+        BlocProvider<InventoryCubit>(
+          create: (context) => InventoryCubit(
+            shoppinglistRepository: context.read(),
+          ),
         ),
-        BlocProvider<ShoppingListBloc>(
-          create: (context) => ShoppingListBloc(
-            listsBloc: BlocProvider.of<ListsBloc>(context),
+        BlocProvider<ShoppinglistCubit>(
+          create: (context) => ShoppinglistCubit(
+            shoppinglistRepository: context.read(),
           ),
         )
       ],

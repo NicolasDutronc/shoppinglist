@@ -6,20 +6,28 @@ import 'package:shoppinglist/users/repository/repository.dart';
 
 class HttpUserRepository extends UserRepository {
   final String url;
+  final bool tls;
   HttpClient _client;
 
-  HttpUserRepository({@required this.url}) {
+  HttpUserRepository({@required this.url, @required this.tls}) {
     _client = HttpClient()
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
+  }
+
+  Uri makeUri(String path) {
+    if (tls) {
+      return Uri.https(url, path);
+    } else {
+      return Uri.http(url, path);
+    }
   }
 
   @override
   Future<String> authenticate(
       {@required String username, @required String password}) async {
     // build request
-    HttpClientRequest req =
-        await _client.postUrl(Uri.https(url, '/api/v1/login'));
+    HttpClientRequest req = await _client.postUrl(makeUri('/api/v1/login'));
     req.headers.contentType = ContentType.json;
     req.add(utf8.encode(jsonEncode({
       'username': username,
