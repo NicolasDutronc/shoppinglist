@@ -13,7 +13,7 @@ class Authenticated extends AuthenticationState {}
 class Authenticating extends AuthenticationState {}
 
 class Unauthenticated extends AuthenticationState {
-  final String error;
+  final Exception error;
 
   const Unauthenticated({@required this.error});
 

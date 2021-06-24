@@ -21,7 +21,7 @@ class ShoppinglistLoaded extends ShoppinglistState {
 }
 
 class ShoppinglistLoadFailed extends ShoppinglistState {
-  final String error;
+  final Exception error;
 
   const ShoppinglistLoadFailed({@required this.error});
 
