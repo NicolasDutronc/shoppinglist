@@ -22,9 +22,7 @@ class HttpListRepository extends ShoppinglistRepository {
     @required this.authenticationCubit,
     @required this.userRepository,
   }) {
-    this._client = new HttpClient()
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+    this._client = new HttpClient();
   }
 
   Uri makeUri(String path) {

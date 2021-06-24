@@ -10,9 +10,7 @@ class HttpUserRepository extends UserRepository {
   HttpClient _client;
 
   HttpUserRepository({@required this.url, @required this.tls}) {
-    _client = HttpClient()
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+    _client = HttpClient();
   }
 
   Uri makeUri(String path) {

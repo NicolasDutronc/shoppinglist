@@ -2,8 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:shoppinglist/users/authentication_cubit/cubit.dart';
 import 'package:shoppinglist/users/repository/repository.dart';
 
-Future<Dio> configureDio(String baseUrl, UserRepository userRepository,
-    AuthenticationCubit authenticationCubit) async {
+Dio configureDio(
+  String baseUrl,
+  UserRepository userRepository,
+  AuthenticationCubit authenticationCubit,
+) {
   var dio = Dio(BaseOptions(
     baseUrl: baseUrl,
   ));
